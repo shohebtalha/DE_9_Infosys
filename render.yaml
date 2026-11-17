@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: consent-manager
+    runtime: docker
+    plan: starter
+    rootDir: consent-manager/backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    disk:
+      name: consent-manager-keys
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: 8095
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: consent-manager-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: consent-manager-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: consent-manager-db
+          property: password
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: APP_JWT_SECRET
+        generateValue: true
+      - key: APP_RSA_KEYS_DIR
+        value: /var/data/keys
+
+databases:
+  - name: consent-manager-db
+    plan: 0.1c-256mb
+    databaseName: consent_manager_db_fyp
+    user: consent_manager
